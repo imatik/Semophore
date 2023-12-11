@@ -93,7 +93,6 @@ class Provider extends Thread {
             if(store.store_map.get(key) == 0) {
                 temp++;
             }
-
         }
 
         try {
@@ -104,7 +103,6 @@ class Provider extends Thread {
         if(temp>1 && store.getSemaphore().tryAcquire()) {
 
             System.out.println("В очереди "+ name);
-            store.getSemaphore().tryAcquire();
             try {
                 System.out.println("Работает "+ name);
 
@@ -120,7 +118,7 @@ class Provider extends Thread {
                 throw new RuntimeException(e);
             }
         }else {
-            System.out.println("Ненужен "+ name);
+            System.out.println("Не нужен "+ name);
             Thread.currentThread().interrupt();
         }
     }
@@ -141,19 +139,38 @@ class Bouquet_Creater extends Thread{
     @Override
     public void run() {
 
+        boolean work = true;
+        for (String key : store.store_map.keySet()) {
+            if(key != inf_flower.getName() && store.store_map.get(key) == 0) {
+                work = false;
+            }
+        }
+
         try {
-            store.getSemaphore().acquire();
-
-            store.store_map.forEach((key, value) -> {
-                if(key == inf_flower.getName())
-                    store.put_flowers(inf_flower.getName(),0);
-                else
-                    store.put_flowers(key,-1);
-            });
-
-            store.getSemaphore().release();
+            Thread.sleep((long) ThreadLocalRandom.current().nextDouble());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }
+
+        if(work && store.getSemaphore().tryAcquire()) {
+            System.out.println("В очереди " + name);
+            try {
+                System.out.println("Работает " + name);
+                store.store_map.forEach((key, value) -> {
+                    if (key == inf_flower.getName())
+                        store.put_flowers(inf_flower.getName(), 0);
+                    else
+                        store.put_flowers(key, -1);
+                });
+                Thread.sleep(300);
+                System.out.println("Закончил работать " + name);
+                store.getSemaphore().release();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }else{
+            System.out.println("Не нужен "+ name);
+            Thread.currentThread().interrupt();
         }
 
     }
@@ -186,21 +203,6 @@ public class Main {
 
         V1 = new Provider(store,Flower.Roses,4,Flower.Filas,5);
         V1.name = "V1";
-            V2 = new Provider(store,Flower.Pions,2,Flower.Roses,3);
-        V2.name = "V2";
-        V3 = new Provider(store,Flower.Pions,5,Flower.Filas,1);
-        V3.name = "V3";
-
-        V1.start();
-        V2.start();
-        V3.start();
-
-        V1.join();
-        V2.join();
-        V3.join();
-
-        V1 = new Provider(store,Flower.Roses,4,Flower.Filas,5);
-        V1.name = "V1";
         V2 = new Provider(store,Flower.Pions,2,Flower.Roses,3);
         V2.name = "V2";
         V3 = new Provider(store,Flower.Pions,5,Flower.Filas,1);
@@ -214,8 +216,9 @@ public class Main {
         V2.join();
         V3.join();
 
-/*        S1.start();
-        S1.join();*/
+
+        S1.start();
+        S1.join();
 
 
 /*            S2.start();
