@@ -20,7 +20,6 @@ enum Flower{
 
 class Flowers{
     private String name;
-    private boolean occupied;
 
     Flowers(String name){
         this.name = name;
@@ -28,12 +27,7 @@ class Flowers{
     public String getName(){
         return this.name;
     }
-    public void Occupy(){
-        occupied = true;
-    }
-    public void free(){
-        occupied = false;
-    }
+
 }
 
 class Store {
@@ -70,7 +64,6 @@ class Store {
 
 class Provider extends Thread {
     public String name;
-    public static boolean flag;
     private Store store;
     public Flower flower1;
     public Flower flower2;
@@ -103,20 +96,14 @@ class Provider extends Thread {
         if(temp>1 && store.getSemaphore().tryAcquire()) {
 
             System.out.println("В очереди "+ name);
-            try {
-                System.out.println("Работает "+ name);
+            System.out.println("Работает "+ name);
 
-                store.put_flowers(flower1.getName(), value_f1);
-                store.put_flowers(flower2.getName(), value_f2);
+            store.put_flowers(flower1.getName(), value_f1);
+            store.put_flowers(flower2.getName(), value_f2);
 
-                Thread.sleep(300);
+            System.out.println("Закончил работать "+ name);
+            store.getSemaphore().release();
 
-                System.out.println("Закончил работать "+ name);
-                store.getSemaphore().release();
-
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }else {
             System.out.println("Не нужен "+ name);
             Thread.currentThread().interrupt();
@@ -199,7 +186,7 @@ public class Main {
         Provider V2;
         Provider V3;
 
-        while (Store.bouquet < 11) {
+        while (Store.bouquet < 15) {
             S1 = new Bouquet_Creater(store, Flower.Pions);
             S1.name = "S1";
             S2 = new Bouquet_Creater(store, Flower.Filas);
@@ -231,7 +218,7 @@ public class Main {
             S3.join();
 
             store.show_store();
-            System.out.println(Store.bouquet);
+            System.out.println("Сделано букетов "+ Store.bouquet+"\n");
         }
     }
 }
