@@ -120,6 +120,8 @@ class Provider extends Thread {
         }else {
             System.out.println("Не нужен "+ name);
             Thread.currentThread().interrupt();
+            while(!isInterrupted()){
+            }
         }
     }
 
@@ -164,6 +166,7 @@ class Bouquet_Creater extends Thread{
                 });
                 Thread.sleep(300);
                 System.out.println("Закончил работать " + name);
+                Store.bouquet++;
                 store.getSemaphore().release();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -171,6 +174,8 @@ class Bouquet_Creater extends Thread{
         }else{
             System.out.println("Не нужен "+ name);
             Thread.currentThread().interrupt();
+            while(!isInterrupted()){
+            }
         }
 
     }
@@ -194,39 +199,39 @@ public class Main {
         Provider V2;
         Provider V3;
 
-        S1 = new Bouquet_Creater(store,Flower.Pions);
-        S1.name = "S1";
-/*            S2 = new Bouquet_Creater(store,Flower.Filas);
-        S2.name = "S2";
-        S3 = new Bouquet_Creater(store,Flower.Roses);
-        S3.name = "S3";*/
+        while (Store.bouquet < 11) {
+            S1 = new Bouquet_Creater(store, Flower.Pions);
+            S1.name = "S1";
+            S2 = new Bouquet_Creater(store, Flower.Filas);
+            S2.name = "S2";
+            S3 = new Bouquet_Creater(store, Flower.Roses);
+            S3.name = "S3";
 
-        V1 = new Provider(store,Flower.Roses,4,Flower.Filas,5);
-        V1.name = "V1";
-        V2 = new Provider(store,Flower.Pions,2,Flower.Roses,3);
-        V2.name = "V2";
-        V3 = new Provider(store,Flower.Pions,5,Flower.Filas,1);
-        V3.name = "V3";
+            V1 = new Provider(store, Flower.Roses, 4, Flower.Filas, 5);
+            V1.name = "V1";
+            V2 = new Provider(store, Flower.Pions, 2, Flower.Roses, 3);
+            V2.name = "V2";
+            V3 = new Provider(store, Flower.Pions, 5, Flower.Filas, 1);
+            V3.name = "V3";
 
-        V1.start();
-        V2.start();
-        V3.start();
+            V1.start();
+            V2.start();
+            V3.start();
 
-        V1.join();
-        V2.join();
-        V3.join();
+            S1.start();
+            S2.start();
+            S3.start();
 
+            V1.join();
+            V2.join();
+            V3.join();
 
-        S1.start();
-        S1.join();
+            S1.join();
+            S2.join();
+            S3.join();
 
-
-/*            S2.start();
-        S3.start();*/
-        store.show_store();
-
-/*            S2.join();
-        S3.join();*/
-
+            store.show_store();
+            System.out.println(Store.bouquet);
+        }
     }
 }
